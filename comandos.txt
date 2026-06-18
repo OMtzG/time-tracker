@@ -1,0 +1,15 @@
+iniciar agent team en terminal
+tmux new-session -s claude-work 
+tmux attach-session -t claude-work
+claude
+tmux kill-session -t claude-work
+
+crear nuevo entorno 
+mkdir -p .agents
+   echo "# Status Board" > .agents/STATUS.md
+   echo "<contexto del proyecto y objetivo>" > .agents/BRIEF.md
+
+tmux session 
+!  tmux attach -t agent-team
+PSMUX_SESSION= tmux new-session -s agent-team
+! PSMUX_SESSION= tmux new-session -s agent-team

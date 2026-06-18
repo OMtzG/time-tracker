@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Horas</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav id="main-nav">
+    <div class="nav-inner">
+      <div class="nav-tabs">
+        <button class="nav-tab active" data-tab="hoy">Hoy</button>
+        <button class="nav-tab" data-tab="historial">Historial</button>
+        <button class="nav-tab" data-tab="resumenes">Resúmenes</button>
+        <button class="nav-tab" data-tab="exportar">Exportar</button>
+      </div>
+      <div class="nav-actions">
+        <button id="btn-toggle-theme" class="btn-icon" title="Cambiar tema">🌓</button>
+        <button id="btn-config" class="btn-icon" title="Configuración">⚙</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main id="main-content">
+
+    <!-- =================== TAB: HOY =================== -->
+    <section id="tab-hoy" class="tab-section active">
+
+      <!-- Active Timer -->
+      <div class="card" id="timer-card">
+        <h2 class="card-title">Temporizador</h2>
+        <div id="timer-display" class="timer-display">00:00:00</div>
+        <div class="timer-controls">
+          <input
+            type="text"
+            id="timer-task-name"
+            class="input"
+            placeholder="Nombre de la tarea…"
+            autocomplete="off"
+          />
+          <select id="timer-category" class="input select">
+            <option value="">— Categoría —</option>
+            <option value="Introspección">Introspección</option>
+            <option value="Proyecto">Proyecto</option>
+            <option value="Curso">Curso</option>
+          </select>
+          <div class="timer-btn-row">
+            <button id="btn-timer-start" class="btn btn-primary">▶ Iniciar</button>
+            <button id="btn-timer-stop" class="btn btn-danger" disabled>■ Detener</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manual Entry Form -->
+      <div class="card" id="manual-entry-card">
+        <h2 class="card-title">Entrada manual</h2>
+        <form id="form-manual-entry" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="entry-date">Fecha</label>
+              <input type="date" id="entry-date" class="input" required />
+            </div>
+            <div class="form-group">
+              <label for="entry-start">Hora inicio</label>
+              <input type="time" id="entry-start" class="input" required />
+            </div>
+            <div class="form-group">
+              <label for="entry-end">Hora fin</label>
+              <input type="time" id="entry-end" class="input" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group form-group--grow">
+              <label for="entry-task">Tarea</label>
+              <input type="text" id="entry-task" class="input" placeholder="Descripción…" required />
+            </div>
+            <div class="form-group">
+              <label for="entry-category">Categoría</label>
+              <select id="entry-category" class="input select">
+                <option value="">— Seleccionar —</option>
+                <option value="Introspección">Introspección</option>
+                <option value="Proyecto">Proyecto</option>
+                <option value="Curso">Curso</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="entry-notes">Notas</label>
+            <textarea id="entry-notes" class="input textarea" rows="2" placeholder="Opcional…"></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">+ Agregar entrada</button>
+            <button type="reset" class="btn btn-secondary">Limpiar</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Day Summary -->
+      <div class="card" id="day-summary-card">
+        <div class="day-summary-header">
+          <h2 class="card-title">Entradas de hoy</h2>
+          <div id="day-total" class="day-total">Total: 0h 00m</div>
+        </div>
+        <div id="entries-list" class="entries-list">
+          <!-- JS populates entry cards here -->
+          <p class="empty-state" id="entries-empty">No hay entradas para hoy.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =================== TAB: HISTORIAL =================== -->
+    <section id="tab-historial" class="tab-section">
+
+      <div class="card">
+        <h2 class="card-title">Historial</h2>
+        <div class="filter-bar" id="history-filters">
+          <div class="form-group">
+            <label for="hist-date-from">Desde</label>
+            <input type="date" id="hist-date-from" class="input input--sm" />
+          </div>
+          <div class="form-group">
+            <label for="hist-date-to">Hasta</label>
+            <input type="date" id="hist-date-to" class="input input--sm" />
+          </div>
+          <div class="form-group form-group--grow">
+            <label for="hist-search">Buscar</label>
+            <input type="search" id="hist-search" class="input input--sm" placeholder="Tarea, categoría…" />
+          </div>
+          <div class="form-group">
+            <label for="hist-category-filter">Categoría</label>
+            <select id="hist-category-filter" class="input input--sm select">
+              <option value="">Todas</option>
+              <option value="Introspección">Introspección</option>
+              <option value="Proyecto">Proyecto</option>
+              <option value="Curso">Curso</option>
+            </select>
+          </div>
+          <button id="btn-hist-filter" class="btn btn-primary btn--sm">Filtrar</button>
+          <button id="btn-hist-clear" class="btn btn-secondary btn--sm">Limpiar</button>
+        </div>
+        <div id="history-table" class="table-wrapper">
+          <!-- JS renders table here -->
+          <p class="empty-state" id="history-empty">No hay registros en este rango.</p>
+        </div>
+        <div id="history-pagination" class="pagination"></div>
+      </div>
+
+    </section>
+
+    <!-- =================== TAB: RESÚMENES =================== -->
+    <section id="tab-resumenes" class="tab-section">
+
+      <div class="card">
+        <div class="summary-header">
+          <div class="summary-period-controls">
+            <select id="summary-period" class="input select input--sm">
+              <option value="week">Semana</option>
+              <option value="month">Mes</option>
+            </select>
+            <div class="period-nav">
+              <button id="btn-period-prev" class="btn btn-secondary btn--sm">‹ Anterior</button>
+              <span id="period-label" class="period-label">Semana actual</span>
+              <button id="btn-period-next" class="btn btn-secondary btn--sm">Siguiente ›</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart container -->
+        <div id="chart-container" class="chart-container">
+          <canvas id="summary-chart" width="760" height="300"></canvas>
+          <p class="empty-state" id="chart-empty" style="display:none">Sin datos para mostrar.</p>
+        </div>
+
+        <!-- Summary table -->
+        <div id="summary-table" class="table-wrapper">
+          <!-- JS renders summary rows here -->
+        </div>
+
+        <!-- Goal progress -->
+        <div id="goal-progress" class="goal-progress">
+          <h3 class="section-subtitle">Progreso de metas semanales</h3>
+          <div id="goal-bars" class="goal-bars">
+            <!-- JS renders progress bars here -->
+          </div>
+        </div>
+
+        <!-- Penalty summary -->
+        <div id="penalty-summary" class="penalty-card">
+          <span class="penalty-label">Sanción acumulada:</span>
+          <span id="penalty-amount" class="penalty-amount">€0.00</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =================== TAB: EXPORTAR =================== -->
+    <section id="tab-exportar" class="tab-section">
+
+      <div class="card">
+        <h2 class="card-title">Exportar datos</h2>
+
+        <div class="export-range">
+          <h3 class="section-subtitle">Rango de fechas</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="export-date-from">Desde</label>
+              <input type="date" id="export-date-from" class="input" />
+            </div>
+            <div class="form-group">
+              <label for="export-date-to">Hasta</label>
+              <input type="date" id="export-date-to" class="input" />
+            </div>
+            <div class="form-group">
+              <label for="export-category">Categoría</label>
+              <select id="export-category" class="input select">
+                <option value="">Todas</option>
+                <option value="Introspección">Introspección</option>
+                <option value="Proyecto">Proyecto</option>
+                <option value="Curso">Curso</option>
+              </select>
+            </div>
+          </div>
+          <div class="export-presets">
+            <button class="btn btn-secondary btn--sm" data-export-preset="today">Hoy</button>
+            <button class="btn btn-secondary btn--sm" data-export-preset="week">Esta semana</button>
+            <button class="btn btn-secondary btn--sm" data-export-preset="month">Este mes</button>
+            <button class="btn btn-secondary btn--sm" data-export-preset="all">Todo</button>
+          </div>
+        </div>
+
+        <div class="export-preview">
+          <h3 class="section-subtitle">Vista previa</h3>
+          <div id="export-preview-table" class="table-wrapper">
+            <p class="empty-state" id="export-empty">Selecciona un rango para previsualizar.</p>
+          </div>
+          <div id="export-count" class="export-count"></div>
+        </div>
+
+        <div class="export-actions">
+          <button id="btn-export-csv" class="btn btn-primary">⬇ Exportar CSV</button>
+          <button id="btn-export-xlsx" class="btn btn-primary">⬇ Exportar XLSX</button>
+          <button id="btn-export-json" class="btn btn-secondary">⬇ Backup JSON</button>
+          <button id="btn-import-json" class="btn btn-secondary">⬆ Importar JSON</button>
+          <input type="file" id="import-file-input" accept=".json" style="display:none" />
+        </div>
+
+        <div class="danger-zone">
+          <h3 class="section-subtitle danger-title">Zona de peligro</h3>
+          <button id="btn-clear-all" class="btn btn-danger">🗑 Borrar todos los datos</button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ===== MODAL: CONFIGURACIÓN ===== -->
+  <div id="modal-config" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-config-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-config-title" class="modal-title">Configuración</h2>
+        <button id="btn-modal-close" class="btn-icon btn-close" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Penalty rate -->
+        <div class="config-section">
+          <h3 class="config-section-title">Sanciones</h3>
+          <div class="form-group">
+            <label for="config-penalty-rate">Tarifa de sanción (€/h por hora faltante)</label>
+            <input type="number" id="config-penalty-rate" class="input" min="0" step="0.5" value="3" />
+          </div>
+        </div>
+
+        <!-- Weekly goals -->
+        <div class="config-section">
+          <h3 class="config-section-title">Metas semanales por categoría</h3>
+          <div id="config-goals-list" class="config-goals-list">
+            <div class="config-goal-row" data-category="Introspección">
+              <span class="badge badge--introspection">Introspección</span>
+              <input type="number" class="input input--sm goal-input" min="0" step="0.5" value="2" />
+              <span class="goal-unit">h/semana</span>
+              <button class="btn-icon btn-remove-category" title="Eliminar" aria-label="Eliminar categoría">✕</button>
+            </div>
+            <div class="config-goal-row" data-category="Proyecto">
+              <span class="badge badge--project">Proyecto</span>
+              <input type="number" class="input input--sm goal-input" min="0" step="0.5" value="8" />
+              <span class="goal-unit">h/semana</span>
+              <button class="btn-icon btn-remove-category" title="Eliminar" aria-label="Eliminar categoría">✕</button>
+            </div>
+            <div class="config-goal-row" data-category="Curso">
+              <span class="badge badge--course">Curso</span>
+              <input type="number" class="input input--sm goal-input" min="0" step="0.5" value="5" />
+              <span class="goal-unit">h/semana</span>
+              <button class="btn-icon btn-remove-category" title="Eliminar" aria-label="Eliminar categoría">✕</button>
+            </div>
+          </div>
+          <!-- Add new category -->
+          <div class="add-category-row">
+            <input type="text" id="new-category-name" class="input input--sm" placeholder="Nueva categoría…" />
+            <input type="number" id="new-category-goal" class="input input--sm" min="0" step="0.5" placeholder="h/sem" />
+            <button id="btn-add-category" class="btn btn-secondary btn--sm">+ Agregar</button>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button id="btn-config-save" class="btn btn-primary">Guardar</button>
+        <button id="btn-config-cancel" class="btn btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: CONFIRM DELETE ===== -->
+  <div id="modal-confirm" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal modal--sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Confirmar</h2>
+      </div>
+      <div class="modal-body">
+        <p id="modal-confirm-text">¿Estás seguro?</p>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-confirm-yes" class="btn btn-danger">Eliminar</button>
+        <button id="btn-confirm-no" class="btn btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TOAST NOTIFICATIONS ===== -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
