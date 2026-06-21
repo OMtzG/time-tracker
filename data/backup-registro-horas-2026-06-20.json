@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "exported": "2026-06-20T09:48:28.665Z",
+  "entries": [
+    {
+      "id": "1576f5ef-9815-4862-a277-438f0ea9f62a",
+      "task": "bajar el repo y configurar el portatil",
+      "category": "Curso",
+      "date": "2026-06-19",
+      "start": "12:21",
+      "end": "13:20",
+      "duration_min": 59,
+      "notes": ""
+    },
+    {
+      "id": "576a0f4e-37dc-47c6-9486-9fc3561510d6",
+      "task": "Creacion de contenido",
+      "category": "Proyecto",
+      "date": "2026-06-16",
+      "start": "12:00",
+      "end": "19:00",
+      "duration_min": 420,
+      "notes": ""
+    },
+    {
+      "id": "2d430cd8-5108-4f2f-88d4-c9da2380424c",
+      "task": "Hablar de mis objetivo y creacion del tracker",
+      "category": "Introspección",
+      "date": "2026-06-18",
+      "start": "12:30",
+      "end": "14:30",
+      "duration_min": 120,
+      "notes": ""
+    },
+    {
+      "id": "9f530a3d-0b4d-4d9e-a916-baa08bec1585",
+      "task": "Tarea Tokyoschool",
+      "category": "Curso",
+      "date": "2026-06-18",
+      "start": "12:00",
+      "end": "13:00",
+      "duration_min": 60,
+      "notes": ""
+    }
+  ],
+  "config": {
+    "sanction_rate_eur": 3,
+    "weekly_targets": {
+      "Introspección": 2,
+      "Proyecto": 8,
+      "Curso": 5
+    },
+    "categories": [
+      "Introspección",
+      "Proyecto",
+      "Curso"
+    ]
+  }
+}
