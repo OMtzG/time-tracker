@@ -245,9 +245,6 @@ input,select,textarea{font-family:inherit;font-size:inherit;}
           <input type="text" id="timer-task" class="input" placeholder="Nombre de la tarea…" autocomplete="off" />
           <select id="timer-category" class="input select">
             <option value="">Sin categoría</option>
-            <option value="Introspección">Introspección</option>
-            <option value="Proyecto">Proyecto</option>
-            <option value="Curso">Curso</option>
           </select>
           <div class="timer-btn-row">
             <button id="timer-start-btn" class="btn btn-primary">▶ Iniciar</button>
@@ -283,9 +280,6 @@ input,select,textarea{font-family:inherit;font-size:inherit;}
               <label for="manual-category">Categoría</label>
               <select id="manual-category" class="input select">
                 <option value="">Sin categoría</option>
-                <option value="Introspección">Introspección</option>
-                <option value="Proyecto">Proyecto</option>
-                <option value="Curso">Curso</option>
               </select>
             </div>
           </div>
@@ -424,31 +418,13 @@ input,select,textarea{font-family:inherit;font-size:inherit;}
           <h3 class="config-section-title">Sanciones</h3>
           <div class="form-group">
             <label for="config-penalty-rate">Tarifa de sanción (€/h por hora faltante)</label>
-            <input type="number" id="config-penalty-rate" class="input" min="0" step="0.5" value="3" />
+            <input type="number" id="config-penalty-rate" class="input" min="0" step="0.5" />
           </div>
         </div>
         <div class="config-section">
           <h3 class="config-section-title">Metas semanales por categoría</h3>
-          <div id="config-goals-list" class="config-goals-list">
-            <div class="config-goal-row" data-category="Introspección">
-              <span class="badge badge--introspection">Introspección</span>
-              <input type="number" class="input input--sm goal-input" min="0" step="0.5" value="2" />
-              <span class="goal-unit">h/semana</span>
-              <button class="btn-icon btn-remove-category" title="Eliminar">✕</button>
-            </div>
-            <div class="config-goal-row" data-category="Proyecto">
-              <span class="badge badge--project">Proyecto</span>
-              <input type="number" class="input input--sm goal-input" min="0" step="0.5" value="8" />
-              <span class="goal-unit">h/semana</span>
-              <button class="btn-icon btn-remove-category" title="Eliminar">✕</button>
-            </div>
-            <div class="config-goal-row" data-category="Curso">
-              <span class="badge badge--course">Curso</span>
-              <input type="number" class="input input--sm goal-input" min="0" step="0.5" value="5" />
-              <span class="goal-unit">h/semana</span>
-              <button class="btn-icon btn-remove-category" title="Eliminar">✕</button>
-            </div>
-          </div>
+          <!-- Las filas se generan dinámicamente en openConfigModal() desde la config (weekly_targets) -->
+          <div id="config-goals-list" class="config-goals-list"></div>
           <div class="add-category-row">
             <input type="text" id="new-category-name" class="input input--sm" placeholder="Nueva categoría…" />
             <input type="number" id="new-category-goal" class="input input--sm" min="0" step="0.5" placeholder="h/sem" />
@@ -1416,15 +1392,35 @@ input,select,textarea{font-family:inherit;font-size:inherit;}
 
   function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+  function badgeClass(name) {
+    var normalized = String(name).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+    var map = {'introspección':'introspection','introspection':'introspection','proyecto':'project','project':'project','curso':'course','course':'course'};
+    return map[normalized] || map[String(name).toLowerCase()] || 'default';
+  }
+  function buildGoalRow(name, goalVal) {
+    var row = document.createElement('div');
+    row.className = 'config-goal-row';
+    row.setAttribute('data-category', name);
+    row.innerHTML = '<span class="badge badge--'+badgeClass(name)+'">'+escHtml(name)+'</span>'
+      +'<input type="number" class="input input--sm goal-input" min="0" step="0.5" value="'+goalVal+'" />'
+      +'<span class="goal-unit">h/semana</span>'
+      +'<button class="btn-icon btn-remove-category" title="Eliminar">✕</button>';
+    row.querySelector('.btn-remove-category').addEventListener('click',function(){removeCategoryRow(row,name);});
+    return row;
+  }
   function openConfigModal() {
     var modal = document.getElementById('modal-config'); if(!modal)return;
     var config = window.Storage.getConfig();
     var rateEl = document.getElementById('config-penalty-rate');
     if (rateEl) rateEl.value = config.sanction_rate_eur;
-    document.querySelectorAll('.config-goal-row').forEach(function(row){
-      var cat=row.getAttribute('data-category'), input=row.querySelector('.goal-input');
-      if(cat&&input)input.value=config.weekly_targets[cat]!==undefined?config.weekly_targets[cat]:0;
-    });
+    var list = document.getElementById('config-goals-list');
+    if (list) {
+      list.innerHTML = '';
+      (config.categories || []).forEach(function(cat) {
+        var goalVal = config.weekly_targets[cat] !== undefined ? config.weekly_targets[cat] : 0;
+        list.appendChild(buildGoalRow(cat, goalVal));
+      });
+    }
     modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
   }
   function closeConfigModal() {
@@ -1443,6 +1439,9 @@ input,select,textarea{font-family:inherit;font-size:inherit;}
     closeConfigModal();
     showToast('Configuración guardada','success');
     if (window.HoyTab) window.HoyTab.populateCategorySelects();
+    if (typeof window.Summaries !== 'undefined' && typeof window.Summaries.refresh === 'function') {
+      window.Summaries.refresh();
+    }
   }
 
   function removeCategoryRow(row, name) {
@@ -1458,15 +1457,7 @@ input,select,textarea{font-family:inherit;font-size:inherit;}
     if(!window.Categories.add(name)){showToast('La categoría ya existe','warning');return;}
     var config=window.Storage.getConfig();config.weekly_targets[name]=goal;window.Storage.saveConfig(config);
     var list=document.getElementById('config-goals-list');
-    if(list){
-      var row=document.createElement('div');row.className='config-goal-row';row.setAttribute('data-category',name);
-      row.innerHTML='<span class="badge badge--default">'+escHtml(name)+'</span>'
-        +'<input type="number" class="input input--sm goal-input" min="0" step="0.5" value="'+goal+'" />'
-        +'<span class="goal-unit">h/semana</span>'
-        +'<button class="btn-icon btn-remove-category" title="Eliminar">✕</button>';
-      row.querySelector('.btn-remove-category').addEventListener('click',function(){removeCategoryRow(row,name);});
-      list.appendChild(row);
-    }
+    if(list){list.appendChild(buildGoalRow(name,goal));}
     if(nameEl)nameEl.value='';if(goalEl)goalEl.value='';
     showToast('Categoría "'+name+'" añadida','success');
     if(window.HoyTab)window.HoyTab.populateCategorySelects();
@@ -1496,12 +1487,6 @@ input,select,textarea{font-family:inherit;font-size:inherit;}
     if(saveBtn)saveBtn.addEventListener('click',saveConfig);
     var modalConfig=document.getElementById('modal-config');
     if(modalConfig)modalConfig.addEventListener('click',function(e){if(e.target===modalConfig)closeConfigModal();});
-
-    // Remove category buttons
-    document.querySelectorAll('.btn-remove-category').forEach(function(btn){
-      var row=btn.closest('.config-goal-row');
-      if(row)btn.addEventListener('click',function(){removeCategoryRow(row,row.getAttribute('data-category'));});
-    });
 
     // Add category
     var addCatBtn=document.getElementById('btn-add-category');
